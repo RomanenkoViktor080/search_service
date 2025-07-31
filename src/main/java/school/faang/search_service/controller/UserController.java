@@ -1,5 +1,6 @@
 package school.faang.search_service.controller;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.util.MultiValueMap;
@@ -19,19 +20,31 @@ public class UserController {
 
     @GetMapping("/search")
     public UserSearchResponseDto searchUsers(
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            @ParameterObject SortCursorDto lastSort,
-            @RequestParam(required = false, defaultValue = "0") boolean isIncludeFacets,
-            @RequestParam MultiValueMap<String, String> filters
+            @RequestParam(required = false)
+            @Schema(description = "Текстовый поисковый запрос")
+            String q,
+
+            @RequestParam(required = false, defaultValue = "10")
+            @Schema(description = "Максимальное количество пользователей в ответе", example = "10")
+            int size,
+
+            @ParameterObject
+            @Schema(description = "Информация о сортировки последнего пользователя. Используется для пагинации")
+            SortCursorDto lastSort,
+
+            @RequestParam(required = false, defaultValue = "0")
+            @Schema(description = "Включать ли фасеты (агрегации)", example = "true")
+            boolean isIncludeFacets,
+
+            @RequestParam
+            @Schema(description = "Фильтры для поиска (например, по скиллам, странам и т.д.)")
+            MultiValueMap<String, String> filters
     ) {
         filters.remove("q");
         filters.remove("size");
         filters.remove("lastId");
         filters.remove("lastScore");
         filters.remove("isIncludeFacets");
-        System.out.println(lastSort);
-        System.out.println(filters);
         return searchService.searchUsers(q, size, lastSort, isIncludeFacets, filters);
     }
 }

@@ -237,7 +237,6 @@ public class UserSearchServiceImpl implements UserSearchService {
             SearchResponse<User> searchResponse,
             boolean isIncludeFacets
     ) {
-        System.out.println(searchResponse);
         HitsMetadata<User> hits = searchResponse.hits();
         long total = hits.total() != null ? hits.total().value() : 0;
         List<UserDto> users = hits.hits().stream()
