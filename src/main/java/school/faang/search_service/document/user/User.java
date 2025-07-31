@@ -1,0 +1,48 @@
+package school.faang.search_service.document.user;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import school.faang.search_service.document.country.CountryFilter;
+import school.faang.search_service.document.skill.SkillFilter;
+
+import java.util.Set;
+
+@Getter
+@Setter
+@ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Document(indexName = "users")
+public class User {
+
+    @Id
+    @Field(name = "id", type = FieldType.Long)
+    private long id;
+
+    @Field(name = "is_active", type = FieldType.Boolean, nullValue = "1")
+    private boolean active;
+
+
+    @Field(name = "experience", type = FieldType.Integer)
+    private Integer experience;
+
+    @Field(name = "country", type = FieldType.Nested)
+    private CountryFilter country;
+
+    @Field(name = "headline", type = FieldType.Text)
+    private String headline;
+
+    @Field(name = "about_me", type = FieldType.Text)
+    private String aboutMe;
+
+    @Field(name = "skills", type = FieldType.Nested)
+    private Set<SkillFilter> skills;
+
+    @Field(name = "filters", type = FieldType.Nested)
+    private Set<UserFilter> filters;
+}

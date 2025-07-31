@@ -16,7 +16,7 @@ spring:
         format_sql: true
   kafka:
     bootstrap-servers: localhost:9092
-    group-id: user_service
+    group-id: search_service
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -26,9 +26,18 @@ spring:
       port: 6379
       host: localhost
 
+    elasticsearch:
+      port: 9200
+      host: localhost
+      indexes:
+        users: "users"
+      index:
+        auto-create: true
 server:
   port: 8084
 
 logging:
   level:
     root: info
+
+

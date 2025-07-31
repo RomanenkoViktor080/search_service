@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.7"
+	checkstyle
 }
 
 group = "school.faang"
@@ -38,9 +39,12 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
+	implementation("org.mapstruct:mapstruct:1.5.3.Final")
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 }
 
 dependencyManagement {
@@ -51,4 +55,29 @@ dependencyManagement {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.bootJar {
+	archiveFileName.set("service.jar")
+}
+
+checkstyle {
+	toolVersion = "10.17.0"
+	configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+	checkstyle.enableExternalDtdLoad.set(true)
+}
+
+tasks.checkstyleMain {
+	source = fileTree("${project.rootDir}/src/main/java")
+	include("**/*.java")
+	exclude("**/resources/**")
+
+	classpath = files()
+}
+
+tasks.checkstyleTest {
+	source = fileTree("${project.rootDir}/src/test")
+	include("**/*.java")
+
+	classpath = files()
 }
