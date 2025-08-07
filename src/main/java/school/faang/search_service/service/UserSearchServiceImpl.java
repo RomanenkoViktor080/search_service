@@ -25,6 +25,8 @@ import school.faang.search_service.dto.FacetValueDto;
 import school.faang.search_service.dto.SortCursorDto;
 import school.faang.search_service.dto.UserDto;
 import school.faang.search_service.dto.UserSearchResponseDto;
+import school.faang.search_service.kafka.dto.user.UserViewEvent;
+import school.faang.search_service.kafka.producer.UserViewProducer;
 import school.faang.search_service.mapper.UserMapper;
 
 import java.io.IOException;
@@ -48,6 +50,7 @@ public class UserSearchServiceImpl implements UserSearchService {
 
     private final UserMapper userMapper;
     private final ElasticsearchClient client;
+    private final UserViewProducer userViewProducer;
     @Value("${spring.data.elasticsearch.indexes.users}")
     private String index;
 
@@ -64,7 +67,7 @@ public class UserSearchServiceImpl implements UserSearchService {
                     search.index(index)
                             .size(size)
                             .sort(so -> so.field(f -> f.field("id").order(SortOrder.Desc)))
-                            .sort(so -> so.score(sc -> sc.order(SortOrder.Desc)))
+                            .sort(so -> so.score(score -> score.order(SortOrder.Desc)))
                             .trackScores(true)
                             .query(buildMainQuery(q));
                     if (sortCursorDto != null && sortCursorDto.lastId() != null && sortCursorDto.lastScore() != null) {
@@ -242,6 +245,9 @@ public class UserSearchServiceImpl implements UserSearchService {
         List<UserDto> users = hits.hits().stream()
                 .map(userHit -> userMapper.toUserDto(userHit.source()))
                 .toList();
+
+        sendUsersViewsEvents(hits.hits());
+
         SortCursorDto lastSort = null;
         if (!hits.hits().isEmpty()) {
             List<FieldValue> sort = hits.hits().get(hits.hits().size() - 1).sort();
@@ -313,5 +319,18 @@ public class UserSearchServiceImpl implements UserSearchService {
         }
         log.warn("failed extract field: {}, aggregation: {}", field, aggs);
         return "Error";
+    }
+
+    private void sendUsersViewsEvents(List<Hit<User>> hits) {
+        hits.forEach(userHit -> {
+            User source = userHit.source();
+            if (source != null && source.getPromotionId() != null) {
+                UserViewEvent event = UserViewEvent.builder()
+                        .userId(source.getId())
+                        .promotionId(source.getPromotionId())
+                        .build();
+                userViewProducer.onView(event);
+            }
+        });
     }
 }

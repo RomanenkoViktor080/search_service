@@ -13,4 +13,14 @@ public class KafkaTopicConfig {
     public NewTopic userCreated() {
         return TopicBuilder.name(KafkaTopic.USER_CREATE.getName()).build();
     }
+
+    @Bean
+    public NewTopic promotionUserEvents() {
+        return TopicBuilder.name("promotion.user.events").build();
+    }
+
+    @Bean
+    public NewTopic searchUserImpressionEvents() {
+        return TopicBuilder.name("search.user.impression").build();
+    }
 }

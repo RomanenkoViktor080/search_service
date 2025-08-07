@@ -1,6 +1,7 @@
 package school.faang.search_service.document.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,8 +26,16 @@ public class User {
     private long id;
 
     @Field(name = "is_active", type = FieldType.Boolean, nullValue = "1")
+    @JsonProperty("is_active")
     private boolean active;
 
+    @Field(name = "tariff_id", type = FieldType.Long)
+    @JsonProperty("tariff_id")
+    private Long tariffId;
+
+    @Field(name = "promotion_id", type = FieldType.Long)
+    @JsonProperty("promotion_id")
+    private Long promotionId;
 
     @Field(name = "experience", type = FieldType.Integer)
     private Integer experience;
@@ -38,6 +47,7 @@ public class User {
     private String headline;
 
     @Field(name = "about_me", type = FieldType.Text)
+    @JsonProperty("about_me")
     private String aboutMe;
 
     @Field(name = "skills", type = FieldType.Nested)

@@ -8,7 +8,9 @@ public record UserUpdate(
         boolean active,
         String headline,
         String aboutMe,
-        CountryFilter country
+        CountryFilter country,
+        Long tariffId,
+        Long promotionId
 ) implements UserUpdateEvent {
     @Override
     public String getType() {
