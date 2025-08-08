@@ -3,7 +3,6 @@ package school.faang.search_service.kafka.consumer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import school.faang.search_service.kafka.dto.user.UserCreate;
 import school.faang.search_service.mapper.UserMapper;
 import school.faang.search_service.service.UserService;
 
-@Slf4j
 @RequiredArgsConstructor
 @Component
 public class UserCreateConsumer {

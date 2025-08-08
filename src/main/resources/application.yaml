@@ -30,7 +30,9 @@ spring:
       port: 9200
       host: localhost
       indexes:
-        users: "users"
+        users:
+          title: "users"
+          hours-rotation: 4
       index:
         auto-create: true
 server:

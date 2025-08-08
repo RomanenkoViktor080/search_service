@@ -32,7 +32,7 @@ public class UserUpdateConsumer {
     private final UserMapper userMapper;
     private final ElasticsearchOperations elasticsearchOperations;
     private final ElasticsearchClient client;
-    @Value("${spring.data.elasticsearch.indexes.users}")
+    @Value("${spring.data.elasticsearch.indexes.users.title}")
     private String index;
 
     @KafkaListener(topics = "user.update")

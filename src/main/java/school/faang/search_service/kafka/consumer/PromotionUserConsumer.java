@@ -22,7 +22,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Component
 public class PromotionUserConsumer {
-    @Value("${spring.data.elasticsearch.indexes.users}")
+    @Value("${spring.data.elasticsearch.indexes.users.title}")
     private String index;
 
     private final ObjectMapper objectMapper;

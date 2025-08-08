@@ -7,6 +7,9 @@ import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.FilterAggregate;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScore;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -25,11 +28,15 @@ import school.faang.search_service.dto.FacetValueDto;
 import school.faang.search_service.dto.SortCursorDto;
 import school.faang.search_service.dto.UserDto;
 import school.faang.search_service.dto.UserSearchResponseDto;
+import school.faang.search_service.entity.Tariff;
 import school.faang.search_service.kafka.dto.user.UserViewEvent;
 import school.faang.search_service.kafka.producer.UserViewProducer;
 import school.faang.search_service.mapper.UserMapper;
+import school.faang.search_service.repository.sql.TariffRepository;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +58,11 @@ public class UserSearchServiceImpl implements UserSearchService {
     private final UserMapper userMapper;
     private final ElasticsearchClient client;
     private final UserViewProducer userViewProducer;
-    @Value("${spring.data.elasticsearch.indexes.users}")
+    private final TariffRepository tariffRepository;
+
+    @Value("${spring.data.elasticsearch.indexes.users.hours-rotation}")
+    private long rotationValue;
+    @Value("${spring.data.elasticsearch.indexes.users.title}")
     private String index;
 
     @Override
@@ -83,6 +94,7 @@ public class UserSearchServiceImpl implements UserSearchService {
                 }
         );
         try {
+            System.out.println(request);
             return buildResponse(client.search(request, User.class), isIncludeFacets);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -90,21 +102,59 @@ public class UserSearchServiceImpl implements UserSearchService {
     }
 
     private Query buildMainQuery(
-            String query
+            String term
     ) {
         BoolQuery.Builder bool = new BoolQuery.Builder();
 
         bool.filter(f -> f.term(t -> t.field("is_active").value(true)));
 
-        if (query != null && !query.isBlank()) {
+        if (term != null && !term.isBlank()) {
             bool.must(must -> must.multiMatch(multi -> multi
-                    .query(query)
+                    .query(term)
                     .operator(Operator.And)
                     .fields(SEARCH_FIELDS)
             ));
         }
+        Query base = Query.of(q -> q.bool(bool.build()));
+        return Query.of(q -> q
+                .functionScore(fs -> fs
+                        .query(base)
+                        .functions(buildFunctions())
+                        .scoreMode(FunctionScoreMode.Multiply)
+                        .boostMode(FunctionBoostMode.Sum)
+                )
+        );
+    }
 
-        return Query.of(q -> q.bool(bool.build()));
+    private List<FunctionScore> buildFunctions(
+    ) {
+        List<FunctionScore> functions = new ArrayList<>();
+        for (Tariff tariff : tariffRepository.findAll()) {
+            functions.add(
+                    FunctionScore.of(f -> f
+                            .filter(filter -> filter
+                                    .term(term -> term
+                                            .field("tariff_id")
+                                            .value(tariff.getId())
+                                    )
+                            )
+                            .weight(tariff.getBoostFactor())
+                    )
+            );
+        }
+        functions.add(FunctionScore.of(f -> f
+                        .randomScore(random -> random
+                                .seed(getSeed(Duration.ofHours(rotationValue)))
+                                .field("_seq_no")
+                        ).weight(1.0)
+                )
+        );
+        return functions;
+    }
+
+    private String getSeed(Duration rotationPeriod) {
+        long periodSeconds = rotationPeriod.getSeconds();
+        return String.valueOf(System.currentTimeMillis() / 1000 / periodSeconds);
     }
 
     private Query buildPostFilterQuery(
