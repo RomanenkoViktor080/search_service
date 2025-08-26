@@ -16,7 +16,30 @@ spring:
         format_sql: true
   kafka:
     bootstrap-servers: localhost:9092
-    group-id: search_service
+    properties:
+      schema.registry.url: http://localhost:8081
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      group-id: search_service
+      properties:
+        specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
+    topics:
+      user-create:
+        name: users.create
+      user-update:
+        name: users.update
+      promotion-users-events:
+        name: promotion.users.events
+      search-users-impression:
+        name: search.users.impression
+      promotion-tariffs-events:
+        name: promotion.tariffs.events
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml

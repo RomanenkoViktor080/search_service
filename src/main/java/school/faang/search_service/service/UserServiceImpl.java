@@ -14,16 +14,16 @@ public class UserServiceImpl implements UserService {
         filters.add(UserFilter.builder()
                 .code("country")
                 .title("Страна")
-                .value(String.valueOf(user.getCountry().id()))
-                .valueTitle(user.getCountry().title())
+                .value(String.valueOf(user.getCountry().getId()))
+                .valueTitle(user.getCountry().getTitle())
                 .build());
 
         if (user.getSkills() != null && !user.getSkills().isEmpty()) {
             filters.addAll(user.getSkills().stream().map(skillFilter -> UserFilter.builder()
                             .code("skill")
                             .title("Скилл")
-                            .value(String.valueOf(skillFilter.id()))
-                            .valueTitle(skillFilter.title())
+                            .value(String.valueOf(skillFilter.getId()))
+                            .valueTitle(skillFilter.getTitle())
                             .build()
                     ).toList()
             );

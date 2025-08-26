@@ -9,7 +9,7 @@ public interface UserSearchService {
             String q,
             int size,
             SortCursorDto sortCursorDto,
-            boolean isIncludeFacets,
+            boolean includeFacets,
             MultiValueMap<String, String> filters
     );
 }

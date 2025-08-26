@@ -9,8 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import school.faang.search_service.document.country.CountryFilter;
-import school.faang.search_service.document.skill.SkillFilter;
+import school.faang.avro.common.CountryFilter;
+import school.faang.avro.common.SkillFilter;
 
 import java.util.Set;
 

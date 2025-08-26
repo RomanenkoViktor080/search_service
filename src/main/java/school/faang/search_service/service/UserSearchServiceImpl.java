@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
+import school.faang.avro.user.UserViewEvent;
 import school.faang.search_service.document.user.User;
 import school.faang.search_service.dto.FacetDto;
 import school.faang.search_service.dto.FacetValueDto;
@@ -29,7 +30,6 @@ import school.faang.search_service.dto.SortCursorDto;
 import school.faang.search_service.dto.UserDto;
 import school.faang.search_service.dto.UserSearchResponseDto;
 import school.faang.search_service.entity.Tariff;
-import school.faang.search_service.kafka.dto.user.UserViewEvent;
 import school.faang.search_service.kafka.producer.UserViewProducer;
 import school.faang.search_service.mapper.UserMapper;
 import school.faang.search_service.repository.sql.TariffRepository;
@@ -70,7 +70,7 @@ public class UserSearchServiceImpl implements UserSearchService {
             String q,
             int size,
             SortCursorDto sortCursorDto,
-            boolean isIncludeFacets,
+            boolean includeFacets,
             MultiValueMap<String, String> filters
     ) {
         SearchRequest request = SearchRequest.of(
@@ -87,15 +87,14 @@ public class UserSearchServiceImpl implements UserSearchService {
                                 FieldValue.of(sortCursorDto.lastScore())
                         ));
                     }
-                    if (isIncludeFacets) {
+                    if (includeFacets) {
                         search.aggregations(buildAggregations(filters));
                     }
                     return search.postFilter(buildPostFilterQuery(filters));
                 }
         );
         try {
-            System.out.println(request);
-            return buildResponse(client.search(request, User.class), isIncludeFacets);
+            return buildResponse(client.search(request, User.class), includeFacets);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -375,9 +374,9 @@ public class UserSearchServiceImpl implements UserSearchService {
         hits.forEach(userHit -> {
             User source = userHit.source();
             if (source != null && source.getPromotionId() != null) {
-                UserViewEvent event = UserViewEvent.builder()
-                        .userId(source.getId())
-                        .promotionId(source.getPromotionId())
+                UserViewEvent event = UserViewEvent.newBuilder()
+                        .setUserId(source.getId())
+                        .setPromotionId(source.getPromotionId())
                         .build();
                 userViewProducer.onView(event);
             }

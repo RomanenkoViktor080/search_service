@@ -2,9 +2,9 @@ package school.faang.search_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.avro.tariff.CreateTariffEvent;
+import school.faang.avro.tariff.UpdateTariffEvent;
 import school.faang.search_service.entity.Tariff;
-import school.faang.search_service.kafka.dto.tariff.CreateTariffEvent;
-import school.faang.search_service.kafka.dto.tariff.UpdateTariffEvent;
 import school.faang.search_service.mapper.TariffMapper;
 import school.faang.search_service.repository.sql.TariffRepository;
 
@@ -22,7 +22,7 @@ public class TariffServiceImpl implements TariffService {
 
     @Override
     public void update(UpdateTariffEvent dto) {
-        Tariff tariff = tariffRepository.getByIdOrThrow(dto.id());
+        Tariff tariff = tariffRepository.getByIdOrThrow(dto.getId());
         tariffMapper.update(dto, tariff);
         tariffRepository.save(tariff);
     }

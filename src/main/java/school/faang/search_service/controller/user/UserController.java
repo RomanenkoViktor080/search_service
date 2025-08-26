@@ -1,4 +1,4 @@
-package school.faang.search_service.controller;
+package school.faang.search_service.controller.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
@@ -34,17 +34,21 @@ public class UserController {
 
             @RequestParam(required = false, defaultValue = "0")
             @Schema(description = "Включать ли фасеты (агрегации)", example = "true")
-            boolean isIncludeFacets,
+            boolean includeFacets,
 
             @RequestParam
             @Schema(description = "Фильтры для поиска (например, по скиллам, странам и т.д.)")
             MultiValueMap<String, String> filters
     ) {
+        removeQueryParamsFromFilters(filters);
+        return searchService.searchUsers(q, size, lastSort, includeFacets, filters);
+    }
+
+    private void removeQueryParamsFromFilters(MultiValueMap<String, String> filters) {
         filters.remove("q");
         filters.remove("size");
         filters.remove("lastId");
         filters.remove("lastScore");
-        filters.remove("isIncludeFacets");
-        return searchService.searchUsers(q, size, lastSort, isIncludeFacets, filters);
+        filters.remove("includeFacets");
     }
 }

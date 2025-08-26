@@ -1,7 +1,10 @@
+import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
+
 plugins {
 	java
 	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 	checkstyle
 }
 
@@ -22,6 +25,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven("https://packages.confluent.io/maven/")
 }
 
 extra["springCloudVersion"] = "2025.0.0"
@@ -44,7 +48,14 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("io.confluent:kafka-avro-serializer:7.6.0")
+	implementation("org.apache.avro:avro:1.12.0")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+	implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.15")
+}
+
+tasks.named<GenerateAvroJavaTask>("generateAvroJava") {
+	setSource("src/main/resources/avro")
 }
 
 dependencyManagement {
