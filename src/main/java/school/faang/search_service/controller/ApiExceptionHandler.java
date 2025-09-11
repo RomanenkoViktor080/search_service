@@ -64,7 +64,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(LoggableException.class)
-    public void handleLoggableException(ApiException ex) {
+    public void handleLoggableException(LoggableException ex) {
         log.error(ex.getDebugMessage());
     }
 }
